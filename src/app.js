@@ -1,10 +1,15 @@
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
+const config = require('./config/config');
+const morgan = require('./config/morgan');
 const httpStatus = require('http-status');
 const ApiError = require('./utils/ApiError');
 
 const app = express();
+
+app.use(morgan.successHandler);
+app.use(morgan.errorHandler);
 
 // set security HTTP headers
 app.use(helmet());
