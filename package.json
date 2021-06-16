@@ -4,7 +4,7 @@
   "description": "Removes high quantity personalization fee and replaces it with a single quantity fee instead",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon ./src/index.js",
+    "dev": "cross-env NODE_ENV=development nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,8 +12,11 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "helmet": "^4.6.0",
-    "http-status": "^1.5.0"
+    "http-status": "^1.5.0",
+    "joi": "^17.4.0"
   }
 }

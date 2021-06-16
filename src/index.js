@@ -1,7 +1,8 @@
 const app = require("./app");
+const config = require("./config/config");
 
-const server = app.listen(3000, () => {
-  console.log(`Listening to port 3000`);
+const server = app.listen(config.port, () => {
+  console.log(`Listening to port ${config.port}`);
 });
 
 const exitHandler = () => {
