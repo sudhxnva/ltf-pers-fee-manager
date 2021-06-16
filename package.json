@@ -4,13 +4,15 @@
   "description": "Removes high quantity personalization fee and replaces it with a single quantity fee instead",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon ./src/index.js",
+    "dev": "nodemon ./src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "helmet": "^4.6.0"
   }
 }
