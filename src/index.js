@@ -24,3 +24,8 @@ process.on("SIGTERM", () => {
   console.log("SIGTERM received");
   server.close();
 });
+
+process.on("SIGINT", () => {
+  console.log("SIGINT received");
+  server.close();
+});
