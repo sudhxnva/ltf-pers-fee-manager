@@ -8,6 +8,7 @@ const envVarsSchema = Joi.object()
   .keys({
     NODE_ENV: Joi.string().valid('production', 'development').required(),
     PORT: Joi.number().default(3000),
+    PERS_FEE_ID: Joi.number().required(),
   })
   .unknown();
 
@@ -20,4 +21,5 @@ if (error) {
 module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
+  persFeeId: envVars.PERS_FEE_ID,
 };

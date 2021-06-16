@@ -4,6 +4,7 @@ const cors = require('cors');
 const config = require('./config/config');
 const morgan = require('./config/morgan');
 const httpStatus = require('http-status');
+const routes = require('./routes');
 const ApiError = require('./utils/ApiError');
 
 const app = express();
@@ -24,9 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.options('*', cors());
 
-app.get('/', (req, res) => {
-  res.send('Working Endpoint');
-});
+app.use('/webhook', routes);
 
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
