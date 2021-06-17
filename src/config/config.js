@@ -4,6 +4,7 @@ const Joi = require('joi');
 
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
+// Get the DEV_STORE env var first to figure out other required env vars
 const {
   value: { DEV_STORE },
   error: errorDev,
@@ -14,6 +15,7 @@ const {
 
 if (errorDev) throw new Error(`Config validation error: ${errorDev.message}`);
 
+// Add schema for Shopify private app credentials
 const shopifyEnv = DEV_STORE === false ? '' : 'DEV_';
 
 const authSchema = {};
@@ -23,6 +25,7 @@ authSchema[shopifyEnv + 'SHOP'] = Joi.string()
 authSchema[shopifyEnv + 'API_KEY'] = Joi.string().required();
 authSchema[shopifyEnv + 'API_PASSWD'] = Joi.string().required();
 
+// Schema for remaining env vars
 const envVarsSchema = Joi.object()
   .keys({
     NODE_ENV: Joi.string().valid('production', 'development').required(),

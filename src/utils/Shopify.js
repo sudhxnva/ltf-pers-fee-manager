@@ -22,20 +22,25 @@ class ShopifyHandler {
     return false;
   }
 
+  // Refer to resource https://shopify.dev/tutorials/edit-an-existing-order-with-admin-api for the following flow
   async addNewPersItem(gid, persLineItem) {
+    // Begin editing the order
     const {
       orderEditBegin: { calculatedOrder },
     } = await this.shopify.graphql(beginEdit(gid));
 
+    // Delete the old "Personalization Fee" line item
     const lineItem = calculatedOrder.lineItems.edges.find(
       (l) => l.node.title === 'Personalization Fee' && l.node.quantity > 1
     );
     await this.shopify.graphql(changeLineItemQuantity(calculatedOrder.id, lineItem.node.id, 0));
 
+    // Add the new "Personalization Fee" line item
     await this.shopify.graphql(
       addCustomItemToOrder(calculatedOrder.id, 'Personalization Fee', Number(persLineItem.price), persLineItem.quantity)
     );
 
+    // Complete the order edit and commit it to Shopify
     const {
       orderEditCommit: { order },
     } = await this.shopify.graphql(commitEdit(calculatedOrder.id));

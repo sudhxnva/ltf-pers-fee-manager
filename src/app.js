@@ -14,7 +14,7 @@ app.use(morgan.errorHandler);
 // set security HTTP headers
 app.use(helmet());
 
-// parse json request body
+// parse json request body and store raw buffer in req.rawBody for verifyWebhook middleware
 app.use(
   express.json({
     verify: (req, res, buf) => {
@@ -30,6 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.options('*', cors());
 
+// Main routes
 app.use('/webhook', routes);
 
 // send back a 404 error for any unknown api request
