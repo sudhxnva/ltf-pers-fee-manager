@@ -29,6 +29,7 @@ const envVarsSchema = Joi.object()
     PORT: Joi.number().default(3000),
     PERS_FEE_ID: Joi.number().required(),
     PERS_FEE_EDIT_MSG: Joi.string().required(),
+    WEBHOOK_SECRET: Joi.string().required(),
     ...authSchema,
   })
   .unknown();
@@ -42,6 +43,7 @@ module.exports = {
   port: envVars.PORT,
   persFeeId: envVars.PERS_FEE_ID,
   persFeeEditMessage: envVars.PERS_FEE_EDIT_MSG,
+  webhookSecret: envVars.WEBHOOK_SECRET,
   shopify: {
     SHOP: envVars[shopifyEnv + 'SHOP'],
     API_KEY: envVars[shopifyEnv + 'API_KEY'],

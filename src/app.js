@@ -15,7 +15,13 @@ app.use(morgan.errorHandler);
 app.use(helmet());
 
 // parse json request body
-app.use(express.json());
+app.use(
+  express.json({
+    verify: (req, res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
 
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true }));
