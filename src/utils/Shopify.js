@@ -1,7 +1,13 @@
 const Shopify = require('shopify-api-node');
 const log = require('../config/logger');
 const { shopify: shopifyEnv } = require('../config/config');
-const { beginEdit, addCustomItemToOrder, changeLineItemQuantity, commitEdit } = require('./ShopifyMutations');
+const {
+  beginEdit,
+  addCustomItemToOrder,
+  changeLineItemQuantity,
+  commitEdit,
+  registerWebhookMutation,
+} = require('./ShopifyMutations');
 
 class ShopifyHandler {
   constructor() {
@@ -49,6 +55,12 @@ class ShopifyHandler {
         persLineItem.quantity * 0.01
       })`
     );
+  }
+
+  async registerWebhook() {
+    console.log(await this.shopify.graphql(registerWebhookMutation('ORDERS_CREATE', 'https://test.ngrok.io/webhook/order')));
+
+    log.info('Webhooks registered!');
   }
 }
 

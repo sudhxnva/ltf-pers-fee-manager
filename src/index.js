@@ -1,8 +1,12 @@
 const app = require('./app');
+const ShopifyHandler = require('./utils/Shopify');
 const config = require('./config/config');
 const log = require('./config/logger');
 
 const server = app.listen(config.port, () => {
+  const shop = new ShopifyHandler();
+  shop.registerWebhook();
+
   log.info(`Listening to port ${config.port}`);
 });
 
