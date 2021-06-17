@@ -1,3 +1,5 @@
+const { persFeeEditMessage } = require('../config/config');
+
 module.exports = {
   beginEdit(gid) {
     return `
@@ -68,7 +70,7 @@ module.exports = {
   commitEdit(gid) {
     return `
       mutation commitEdit {
-        orderEditCommit(id: "${gid}", notifyCustomer: false, staffNote: "Personalization Fee quantity updated") {
+        orderEditCommit(id: "${gid}", notifyCustomer: false, staffNote: "${persFeeEditMessage}") {
           order {
             id
           }
