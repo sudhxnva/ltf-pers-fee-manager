@@ -1,6 +1,6 @@
 const Shopify = require('shopify-api-node');
 const log = require('../config/logger');
-const { shopify: shopifyEnv, host } = require('../config/config');
+const { shopify: shopifyEnv, host, perFeeItemTitle } = require('../config/config');
 const {
   beginEdit,
   addCustomItemToOrder,
@@ -41,9 +41,9 @@ class ShopifyHandler {
     );
     await this.shopify.graphql(changeLineItemQuantity(calculatedOrder.id, lineItem.node.id, 0));
 
-    // Add the new "Personalization Fee" line item
+    // Add a new Personalization Fee line item
     await this.shopify.graphql(
-      addCustomItemToOrder(calculatedOrder.id, 'Personalization Fee', Number(persLineItem.price), persLineItem.quantity)
+      addCustomItemToOrder(calculatedOrder.id, perFeeItemTitle, Number(persLineItem.price), persLineItem.quantity)
     );
 
     // Complete the order edit and commit it to Shopify
