@@ -1,6 +1,6 @@
 const Shopify = require('shopify-api-node');
 const log = require('../config/logger');
-const { shopify: shopifyEnv } = require('../config/config');
+const { shopify: shopifyEnv, host } = require('../config/config');
 const {
   beginEdit,
   addCustomItemToOrder,
@@ -57,10 +57,30 @@ class ShopifyHandler {
     );
   }
 
-  async registerWebhook() {
-    console.log(await this.shopify.graphql(registerWebhookMutation('ORDERS_CREATE', 'https://test.ngrok.io/webhook/order')));
+  async registerWebhook(topic) {
+    const callbackUrl = host + '/webhook/order';
 
-    log.info('Webhooks registered!');
+    // Check if webhook already exists
+    const webhooks = await this.shopify.webhook.list();
+    const registeredWebhook = webhooks.find((webhook) => webhook.address === callbackUrl && webhook.topic === topic);
+
+    if (registeredWebhook) return log.info('Webhook exists. Skipping webhook registration');
+
+    console.log(await this.shopify.webhook.create({ address: callbackUrl, topic }));
+    return log.info(`Webhook registered for topic '${topic}'`);
+  }
+
+  async deleteWebhook(topic) {
+    const callbackUrl = host + '/webhook/order';
+
+    // Check if webhook  exists
+    const webhooks = await this.shopify.webhook.list();
+    const registeredWebhook = webhooks.find((webhook) => webhook.address === callbackUrl && webhook.topic === topic);
+
+    if (!registeredWebhook) return log.error('Webhook does not exist. Aborting deletion');
+
+    console.log(await this.shopify.webhook.delete(registeredWebhook.id));
+    log.info(`Webhook for topic: '${topic}' deleted successfully`);
   }
 }
 

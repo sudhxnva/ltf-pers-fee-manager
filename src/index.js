@@ -1,13 +1,13 @@
 const app = require('./app');
 const ShopifyHandler = require('./utils/Shopify');
-const config = require('./config/config');
+const { port } = require('./config/config');
 const log = require('./config/logger');
+const shop = new ShopifyHandler();
 
-const server = app.listen(config.port, () => {
-  const shop = new ShopifyHandler();
-  shop.registerWebhook();
+const server = app.listen(port, () => {
+  shop.registerWebhook('orders/create');
 
-  log.info(`Listening to port ${config.port}`);
+  log.info(`Listening to port ${port}`);
 });
 
 const exitHandler = () => {
@@ -25,12 +25,14 @@ const unexpectedErrorHandler = (error) => {
 process.on('uncaughtException', unexpectedErrorHandler);
 process.on('unhandledRejection', unexpectedErrorHandler);
 
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   log.info('SIGTERM received');
+  await shop.deleteWebhook('orders/create');
   server.close();
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   log.info('SIGINT received');
+  await shop.deleteWebhook('orders/create');
   server.close();
 });

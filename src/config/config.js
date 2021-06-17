@@ -24,15 +24,16 @@ authSchema[shopifyEnv + 'SHOP'] = Joi.string()
   .required();
 authSchema[shopifyEnv + 'API_KEY'] = Joi.string().required();
 authSchema[shopifyEnv + 'API_PASSWD'] = Joi.string().required();
+authSchema[shopifyEnv + 'WEBHOOK_SECRET'] = Joi.string().required();
 
 // Schema for remaining env vars
 const envVarsSchema = Joi.object()
   .keys({
     NODE_ENV: Joi.string().valid('production', 'development').required(),
     PORT: Joi.number().default(3000),
+    HOST: Joi.string().required(),
     PERS_FEE_ID: Joi.number().required(),
     PERS_FEE_EDIT_MSG: Joi.string().required(),
-    WEBHOOK_SECRET: Joi.string().required(),
     ...authSchema,
   })
   .unknown();
@@ -44,9 +45,10 @@ if (error) throw new Error(`Config validation error: ${error.message}`);
 module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
+  host: envVars.HOST,
   persFeeId: envVars.PERS_FEE_ID,
   persFeeEditMessage: envVars.PERS_FEE_EDIT_MSG,
-  webhookSecret: envVars.WEBHOOK_SECRET,
+  webhookSecret: envVars[shopifyEnv + 'WEBHOOK_SECRET'],
   shopify: {
     SHOP: envVars[shopifyEnv + 'SHOP'],
     API_KEY: envVars[shopifyEnv + 'API_KEY'],
