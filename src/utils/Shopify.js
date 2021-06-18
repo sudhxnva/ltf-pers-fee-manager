@@ -29,6 +29,7 @@ class ShopifyHandler {
     const {
       orderEditBegin: { calculatedOrder },
     } = await this.shopify.graphql(beginEdit(gid));
+    let initQuantity = 0;
 
     // Iteration for if multiple pers fee items exist
     for (const persLineItem of persLineItems) {
@@ -50,14 +51,18 @@ class ShopifyHandler {
         )
       );
 
-      log.info(`Original Pers Quantity = ${persLineItem.quantity} ($${persLineItem.quantity * 0.01})`);
+      initQuantity += +persLineItem.quantity;
     }
 
     // Complete the order edit and commit it to Shopify
     const {
       orderEditCommit: { order },
     } = await this.shopify.graphql(commitEdit(calculatedOrder.id));
-    log.info(`Order: ${order.id.split('/')[4]} modified`);
+    log.info(
+      `Order: ${order.id.split('/')[4]} modified. ${initQuantity} items reduced to ${persLineItems.length} item${
+        persLineItems.length === 1 ? '' : 's'
+      }`
+    );
   }
 
   async registerWebhook(topic) {
