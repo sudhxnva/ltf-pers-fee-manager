@@ -4,3 +4,6 @@ node_modules
 # Environment varibales
 .env*
 !.env*.example
+
+# Logfiles
+logs
