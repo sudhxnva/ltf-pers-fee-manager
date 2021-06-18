@@ -18,10 +18,11 @@ class ShopifyHandler {
     });
   }
 
-  async newPersItemExists(orderId) {
+  // Checks if the new pers item has already been added to the order
+  async newPersItemExists(orderId, identifier) {
     const order = await this.shopify.order.get(orderId);
     for (const lineItem of order.line_items) {
-      if (lineItem.title === 'Personalization Fee' && lineItem.product_id === null) {
+      if (lineItem.title === `${perFeeItemTitle} - ${identifier}` && lineItem.product_id === null) {
         return true;
       }
     }
@@ -29,32 +30,40 @@ class ShopifyHandler {
   }
 
   // Refer to resource https://shopify.dev/tutorials/edit-an-existing-order-with-admin-api for the following flow
-  async addNewPersItem(gid, persLineItem) {
+  async addNewPersItems(gid, persLineItems) {
     // Begin editing the order
     const {
       orderEditBegin: { calculatedOrder },
     } = await this.shopify.graphql(beginEdit(gid));
 
-    // Delete the old "Personalization Fee" line item
-    const lineItem = calculatedOrder.lineItems.edges.find(
-      (l) => l.node.title === 'Personalization Fee' && l.node.quantity > 1
-    );
-    await this.shopify.graphql(changeLineItemQuantity(calculatedOrder.id, lineItem.node.id, 0));
+    // Iteration for if multiple pers fee items exist
+    for (const persLineItem of persLineItems) {
+      // Delete the old "Personalization Fee" line item
+      const lineItem = calculatedOrder.lineItems.edges.find(
+        (l) =>
+          l.node.customAttributes.find((attr) => attr.key === '_addFeeID') &&
+          l.node.customAttributes.find((attr) => attr.key === '_addFeeID').value === persLineItem.addFeeID
+      );
+      await this.shopify.graphql(changeLineItemQuantity(calculatedOrder.id, lineItem.node.id, 0));
 
-    // Add a new Personalization Fee line item
-    await this.shopify.graphql(
-      addCustomItemToOrder(calculatedOrder.id, perFeeItemTitle, Number(persLineItem.price), persLineItem.quantity)
-    );
+      // Add a new Personalization Fee line item of single quantity
+      await this.shopify.graphql(
+        addCustomItemToOrder(
+          calculatedOrder.id,
+          `${perFeeItemTitle} - ${persLineItem.itemIdentifier}`,
+          Number(persLineItem.price),
+          persLineItem.quantity
+        )
+      );
+
+      log.info(`Original Pers Quantity = ${persLineItem.quantity} ($${persLineItem.quantity * 0.01})`);
+    }
 
     // Complete the order edit and commit it to Shopify
     const {
       orderEditCommit: { order },
     } = await this.shopify.graphql(commitEdit(calculatedOrder.id));
-    log.info(
-      `Order: ${order.id.split('/')[4]} modified. Original Pers Quantity = ${persLineItem.quantity} ($${
-        persLineItem.quantity * 0.01
-      })`
-    );
+    log.info(`Order: ${order.id.split('/')[4]} modified`);
   }
 
   async registerWebhook(topic) {

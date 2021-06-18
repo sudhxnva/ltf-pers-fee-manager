@@ -23,20 +23,22 @@ module.exports = {
   beginEdit(gid) {
     return `
     mutation beginEdit{
-        orderEditBegin(id: "${gid}"){
-            calculatedOrder{
+      orderEditBegin(id: "${gid}"){
+        calculatedOrder {
+          id
+          lineItems(first: 100) {
+            edges {
+              node {
                 id
-                lineItems(first: 100) {
-              	  edges {
-              	    node {
-                      id
-                      title
-              	      quantity
-              	    }
-              	  }
-              	}
+                customAttributes {
+                  key
+                  value
+                }
+              }
             }
+          }
         }
+      }
     }`;
   },
   addCustomItemToOrder(gid, title, price, quantity = 1) {
