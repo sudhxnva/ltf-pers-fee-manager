@@ -35,6 +35,7 @@ const envVarsSchema = Joi.object()
     PERS_FEE_ID: Joi.number().required(),
     PERS_FEE_EDIT_MSG: Joi.string().required(),
     PERS_FEE_ITEM_TITLE: Joi.string().required(),
+    SENTRY_DSN: Joi.string().required(),
     ...authSchema,
   })
   .unknown();
@@ -51,6 +52,7 @@ module.exports = {
   persFeeEditMessage: envVars.PERS_FEE_EDIT_MSG,
   persFeeItemTitle: envVars.PERS_FEE_ITEM_TITLE,
   webhookSecret: envVars[shopifyEnv + 'WEBHOOK_SECRET'],
+  sentryDsn: envVars.SENTRY_DSN,
   shopify: {
     SHOP: envVars[shopifyEnv + 'SHOP'],
     API_KEY: envVars[shopifyEnv + 'API_KEY'],

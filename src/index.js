@@ -2,6 +2,7 @@ const app = require('./app');
 const ShopifyHandler = require('./utils/Shopify');
 const { port } = require('./config/config');
 const log = require('./config/logger');
+const { Sentry } = require('./config/errorMonitoring');
 const shop = new ShopifyHandler();
 
 const server = app.listen(port, () => {
@@ -10,7 +11,8 @@ const server = app.listen(port, () => {
   log.info(`Listening to port ${port}`);
 });
 
-const exitHandler = () => {
+const exitHandler = async () => {
+  await shop.deleteWebhook('orders/create');
   server.close(() => {
     log.info('Server closed');
     process.exit(1);
@@ -18,6 +20,7 @@ const exitHandler = () => {
 };
 
 const unexpectedErrorHandler = (error) => {
+  Sentry.captureException(err);
   log.error(error);
   exitHandler();
 };
