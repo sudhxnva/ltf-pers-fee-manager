@@ -30,6 +30,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.options('*', cors());
 
+app.get('/favicon.ico', (req, res) => res.sendStatus(204));
+
 // Main routes
 app.use('/webhook', routes);
 
