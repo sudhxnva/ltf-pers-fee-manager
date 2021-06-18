@@ -1,25 +1,6 @@
 const { persFeeEditMessage } = require('../config/config');
 
 module.exports = {
-  registerWebhookMutation(topic, callbackUrl) {
-    return `
-        mutation {
-      webhookSubscriptionCreate(
-        topic: ${topic}
-        webhookSubscription: {
-          format: JSON,
-          callbackUrl: "${callbackUrl}"}
-      ) {
-        userErrors {
-          field
-          message
-        }
-        webhookSubscription {
-          id
-        }
-      }
-    }`;
-  },
   beginEdit(gid) {
     return `
     mutation beginEdit{

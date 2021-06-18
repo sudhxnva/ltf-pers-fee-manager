@@ -49,7 +49,7 @@ module.exports = {
   host: envVars.HOST,
   persFeeId: envVars.PERS_FEE_ID,
   persFeeEditMessage: envVars.PERS_FEE_EDIT_MSG,
-  perFeeItemTitle: envVars.PERS_FEE_ITEM_TITLE,
+  persFeeItemTitle: envVars.PERS_FEE_ITEM_TITLE,
   webhookSecret: envVars[shopifyEnv + 'WEBHOOK_SECRET'],
   shopify: {
     SHOP: envVars[shopifyEnv + 'SHOP'],

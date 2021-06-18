@@ -1,13 +1,7 @@
 const Shopify = require('shopify-api-node');
 const log = require('../config/logger');
-const { shopify: shopifyEnv, host, perFeeItemTitle } = require('../config/config');
-const {
-  beginEdit,
-  addCustomItemToOrder,
-  changeLineItemQuantity,
-  commitEdit,
-  registerWebhookMutation,
-} = require('./ShopifyMutations');
+const { shopify: shopifyEnv, host, persFeeItemTitle } = require('../config/config');
+const { beginEdit, addCustomItemToOrder, changeLineItemQuantity, commitEdit } = require('./ShopifyMutations');
 
 class ShopifyHandler {
   constructor() {
@@ -22,7 +16,7 @@ class ShopifyHandler {
   async newPersItemExists(orderId, identifier) {
     const order = await this.shopify.order.get(orderId);
     for (const lineItem of order.line_items) {
-      if (lineItem.title === `${perFeeItemTitle} - ${identifier}` && lineItem.product_id === null) {
+      if (lineItem.title === `${persFeeItemTitle} - ${identifier}` && lineItem.product_id === null) {
         return true;
       }
     }
@@ -50,7 +44,7 @@ class ShopifyHandler {
       await this.shopify.graphql(
         addCustomItemToOrder(
           calculatedOrder.id,
-          `${perFeeItemTitle} - ${persLineItem.itemIdentifier}`,
+          `${persFeeItemTitle} - ${persLineItem.itemIdentifier}`,
           Number(persLineItem.price),
           persLineItem.quantity
         )
@@ -75,7 +69,6 @@ class ShopifyHandler {
 
     if (registeredWebhook) return log.info('Webhook exists. Skipping webhook registration');
 
-    console.log(await this.shopify.webhook.create({ address: callbackUrl, topic }));
     return log.info(`Webhook registered for topic '${topic}'`);
   }
 
@@ -88,7 +81,6 @@ class ShopifyHandler {
 
     if (!registeredWebhook) return log.error('Webhook does not exist. Aborting deletion');
 
-    console.log(await this.shopify.webhook.delete(registeredWebhook.id));
     log.info(`Webhook for topic: '${topic}' deleted successfully`);
   }
 }
