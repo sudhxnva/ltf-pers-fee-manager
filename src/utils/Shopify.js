@@ -53,7 +53,7 @@ class ShopifyHandler {
         console.log(
           addCustomItemToOrder(
             calculatedOrder.id,
-            `${persFeeItemTitle} - ${persLineItem.itemIdentifier}`,
+            persFeeItemTitle + ' - ' + persLineItem.itemIdentifier,
             Number(persLineItem.price),
             persLineItem.quantity
           )
