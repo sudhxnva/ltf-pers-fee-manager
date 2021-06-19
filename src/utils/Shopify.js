@@ -43,6 +43,7 @@ class ShopifyHandler {
         // Delete the old "Personalization Fee" line item
         const lineItem = calculatedOrder.lineItems.edges.find(
           (l) =>
+            l.node.title === persFeeItemTitle &&
             l.node.customAttributes.find((attr) => attr.key === '_addFeeID') &&
             l.node.customAttributes.find((attr) => attr.key === '_addFeeID').value === persLineItem.addFeeID
         );

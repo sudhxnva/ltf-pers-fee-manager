@@ -11,6 +11,7 @@ module.exports = {
             edges {
               node {
                 id
+                title
                 customAttributes {
                   key
                   value
