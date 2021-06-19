@@ -48,17 +48,6 @@ class ShopifyHandler {
         );
         await this.shopify.graphql(changeLineItemQuantity(calculatedOrder.id, lineItem.node.id, 0));
 
-        console.log(persLineItem);
-
-        console.log(
-          addCustomItemToOrder(
-            calculatedOrder.id,
-            persFeeItemTitle + ' - ' + persLineItem.itemIdentifier,
-            Number(persLineItem.price),
-            persLineItem.quantity
-          )
-        );
-
         // Add a new Personalization Fee line item of single quantity
         await this.shopify.graphql(
           addCustomItemToOrder(
