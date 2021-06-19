@@ -1,11 +1,11 @@
 const Sentry = require('@sentry/node');
-const { sentryDsn } = require('../config/config');
+const { sentryDsn, env } = require('../config/config');
 
 // or use es6 import statements
 // import * as Sentry from '@sentry/node';
 
 Sentry.init({
-  dsn: sentryDsn,
+  dsn: env === 'production' ? sentryDsn : null,
   integrations: [
     // enable HTTP calls tracing
     new Sentry.Integrations.Http({ tracing: true }),
