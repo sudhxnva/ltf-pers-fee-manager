@@ -79,6 +79,7 @@ class ShopifyHandler {
   async registerWebhook(topic) {
     try {
       const callbackUrl = host + '/webhook/order';
+      log.info(`Watching store: ${shopifyEnv.SHOP}`);
 
       // Check if webhook already exists
       const webhooks = await this.shopify.webhook.list();
@@ -88,7 +89,7 @@ class ShopifyHandler {
 
       await this.shopify.webhook.create({ address: callbackUrl, topic });
 
-      return log.info(`Webhook registered for topic '${topic}'`);
+      return log.info(`Webhook registered for topic '${topic}' with callback URL: ${callbackUrl}`);
     } catch (error) {
       Sentry.captureException(error);
       log.error(error);
