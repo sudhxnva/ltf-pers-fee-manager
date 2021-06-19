@@ -25,6 +25,7 @@ authSchema[shopifyEnv + 'SHOP'] = Joi.string()
 authSchema[shopifyEnv + 'API_KEY'] = Joi.string().required();
 authSchema[shopifyEnv + 'API_PASSWD'] = Joi.string().required();
 authSchema[shopifyEnv + 'WEBHOOK_SECRET'] = Joi.string().required();
+authSchema[shopifyEnv + 'PERS_FEE_ID'] = Joi.number().required();
 
 // Schema for remaining env vars
 const envVarsSchema = Joi.object()
@@ -32,7 +33,6 @@ const envVarsSchema = Joi.object()
     NODE_ENV: Joi.string().valid('production', 'development').required(),
     PORT: Joi.number().default(3000),
     HOST: Joi.string().required(),
-    PERS_FEE_ID: Joi.number().required(),
     PERS_FEE_EDIT_MSG: Joi.string().required(),
     PERS_FEE_ITEM_TITLE: Joi.string().required(),
     SENTRY_DSN: Joi.string().required(),
@@ -48,7 +48,7 @@ module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   host: envVars.HOST,
-  persFeeId: envVars.PERS_FEE_ID,
+  persFeeId: envVars[shopifyEnv + 'PERS_FEE_ID'],
   persFeeEditMessage: envVars.PERS_FEE_EDIT_MSG,
   persFeeItemTitle: envVars.PERS_FEE_ITEM_TITLE,
   webhookSecret: envVars[shopifyEnv + 'WEBHOOK_SECRET'],
