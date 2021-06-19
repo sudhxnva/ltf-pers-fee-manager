@@ -86,6 +86,8 @@ class ShopifyHandler {
 
       if (registeredWebhook) return log.info('Webhook exists. Skipping webhook registration');
 
+      await this.shopify.webhook.create({ address: callbackUrl, topic });
+
       return log.info(`Webhook registered for topic '${topic}'`);
     } catch (error) {
       Sentry.captureException(error);
@@ -102,6 +104,8 @@ class ShopifyHandler {
       const registeredWebhook = webhooks.find((webhook) => webhook.address === callbackUrl && webhook.topic === topic);
 
       if (!registeredWebhook) return log.error('Webhook does not exist. Aborting deletion');
+
+      await this.shopify.webhook.delete(registeredWebhook.id);
 
       log.info(`Webhook for topic: '${topic}' deleted successfully`);
     } catch (error) {
