@@ -10,6 +10,7 @@ class ShopifyHandler {
       shopName: shopifyEnv.SHOP,
       apiKey: shopifyEnv.API_KEY,
       password: shopifyEnv.API_PASSWD,
+      apiVersion: '2021-04',
     });
   }
 

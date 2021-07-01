@@ -1,6 +1,6 @@
 {
   "name": "ltf-pers-fee-manager",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Removes high quantity personalization fee and replaces it with a single quantity fee instead",
   "main": "index.js",
   "scripts": {
