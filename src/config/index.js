@@ -15,6 +15,9 @@ const env = cleanEnv(process.env, {
   SHOP: str({ default: 'littlethings-favors.myshopify.com', desc: 'myshopify URL of store' }),
   API_KEY: str({ desc: 'Shopify API Key' }),
   API_PASSWD: str({ desc: 'Shopify API Secret' }),
+  FC_ORDER_INPUT_KEY: str({ desc: 'FashionCraft Order Input Key' }),
+  FC_GET_ORDER_URL: url({ desc: 'URL to get personalization details of FC order' }),
+  FC_SEND_ORDER_URL: url({ desc: 'POST endpoint to send an FC order to' }),
 });
 
 module.exports = env;

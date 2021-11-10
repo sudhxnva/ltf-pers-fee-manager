@@ -1,4 +1,4 @@
-const { PERS_FEE_ID } = require('../config');
+const { PERS_FEE_ID, FC_GET_ORDER_URL, FC_ORDER_INPUT_KEY, FC_SEND_ORDER_URL } = require('../config');
 const ShopifyHandler = require('../utils/Shopify');
 const js2xmlparser = require('js2xmlparser');
 const axios = require('axios').default;
@@ -82,7 +82,7 @@ async function fashioncraftOrderHandler(order, lineItems) {
     let { value: designID } = lineItem.properties.find((prop) => prop.name == '_FC Design ID');
     let { value: productType } = lineItem.properties.find((prop) => (prop.name = '_FC_product_type'));
     if (!designID) continue;
-    const { data } = axios.get(`FC-URL=${designID}`); // TODO: Add to config file
+    const { data } = axios.get(`${FC_GET_ORDER_URL}?DesignID=${designID}`);
     let obj = {
       number: lineItem.sku.split('FC-')[1],
       quantity: lineItem.quantity,
@@ -156,7 +156,7 @@ async function fashioncraftOrderHandler(order, lineItems) {
 
   const orderObj = {
     custNum: 1234, // TODO: Get FC customer number
-    orderInputKey: 'inputkey', // TODO: Add to config file
+    orderInputKey: FC_ORDER_INPUT_KEY,
     poNum: order.id,
     shippingService: 'UPS', // TODO: Check with Mike about this
     shippingMethod,
@@ -168,8 +168,7 @@ async function fashioncraftOrderHandler(order, lineItems) {
   };
   xmlOrderPayload = js2xmlparser.parse('order', orderObj, { declaration: { encoding: 'UTF-8', version: '1.0' } });
 
-  const res = await axios.post('FC-Url', xmlOrderPayload, {
-    // TODO: Add URL
+  const res = await axios.post(`${FC_ORDER_INPUT_KEY}/?beta=1`, xmlOrderPayload, {
     headers: { 'Content-Type': 'text/xml' },
   });
   console.log(res.data);
