@@ -1,8 +1,7 @@
 const dotenv = require('dotenv');
-const path = require('path');
 const { cleanEnv, str, port, url, num } = require('envalid');
 
-dotenv.config({ path: path.join(__dirname, '../../.env') });
+dotenv.config();
 
 const env = cleanEnv(process.env, {
   NODE_ENV: str({ choices: ['development', 'production'] }),

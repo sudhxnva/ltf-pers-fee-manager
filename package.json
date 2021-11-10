@@ -4,8 +4,8 @@
   "description": "Removes high quantity personalization fee and replaces it with a single quantity fee instead",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon src/index.js",
-    "start": "pm2-runtime start ecosystem.config.json -- --no-daemon"
+    "dev": "env-cmd -f ./.env.dev nodemon src/index.js",
+    "start": "pm2 start ecosystem.config.json -- --no-daemon"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +17,7 @@
     "cross-env": "^7.0.3",
     "crypto": "^1.0.1",
     "dotenv": "^10.0.0",
+    "env-cmd": "^10.1.0",
     "envalid": "^7.2.2",
     "express": "^4.17.1",
     "helmet": "^4.6.0",
