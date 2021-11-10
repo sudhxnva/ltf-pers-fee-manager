@@ -1,4 +1,4 @@
-const { persFeeId } = require('../config/config');
+const { PERS_FEE_ID } = require('../config');
 const ShopifyHandler = require('../utils/Shopify');
 const js2xmlparser = require('js2xmlparser');
 const axios = require('axios').default;
@@ -14,7 +14,7 @@ async function orderWebhookHandler(req, res) {
 
   for (const lineItem of order.line_items) {
     if (lineItem.vendor === 'Fashioncraft') fashioncraftLineItems.push(lineItem);
-    if (lineItem.product_id !== persFeeId) continue;
+    if (lineItem.product_id !== PERS_FEE_ID) continue;
     if (lineItem.quantity === 1) continue; // Replacing line item not necessary since quantity is only 1
     originalPersLineItems.push(lineItem);
   }

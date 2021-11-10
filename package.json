@@ -17,6 +17,7 @@
     "cross-env": "^7.0.3",
     "crypto": "^1.0.1",
     "dotenv": "^10.0.0",
+    "envalid": "^7.2.2",
     "express": "^4.17.1",
     "helmet": "^4.6.0",
     "http-status": "^1.5.0",
@@ -26,5 +27,8 @@
     "pm2": "^5.1.0",
     "shopify-api-node": "^3.6.12",
     "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }

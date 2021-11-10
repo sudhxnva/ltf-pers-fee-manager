@@ -1,15 +1,15 @@
 const Shopify = require('shopify-api-node');
 const log = require('../config/logger');
-const { shopify: shopifyEnv, host, persFeeItemTitle } = require('../config/config');
+const { SHOP, API_KEY, API_PASSWD, HOST, PERS_FEE_ITEM_TITLE } = require('../config');
 const { beginEdit, addCustomItemToOrder, changeLineItemQuantity, commitEdit } = require('./ShopifyMutations');
 const { Sentry } = require('../config/errorMonitoring');
 
 class ShopifyHandler {
   constructor() {
     this.shopify = new Shopify({
-      shopName: shopifyEnv.SHOP,
-      apiKey: shopifyEnv.API_KEY,
-      password: shopifyEnv.API_PASSWD,
+      shopName: SHOP,
+      apiKey: API_KEY,
+      password: API_PASSWD,
       apiVersion: '2021-04',
     });
   }
@@ -19,7 +19,7 @@ class ShopifyHandler {
     try {
       const order = await this.shopify.order.get(orderId);
       for (const lineItem of order.line_items) {
-        if (lineItem.title === `${persFeeItemTitle} - ${identifier}` && lineItem.product_id === null) {
+        if (lineItem.title === `${PERS_FEE_ITEM_TITLE} - ${identifier}` && lineItem.product_id === null) {
           return true;
         }
       }
@@ -44,7 +44,7 @@ class ShopifyHandler {
         // Delete the old "Personalization Fee" line item
         const lineItem = calculatedOrder.lineItems.edges.find(
           (l) =>
-            l.node.title === persFeeItemTitle &&
+            l.node.title === PERS_FEE_ITEM_TITLE &&
             l.node.customAttributes.find((attr) => attr.key === '_addFeeID') &&
             l.node.customAttributes.find((attr) => attr.key === '_addFeeID').value === persLineItem.addFeeID
         );
@@ -54,7 +54,7 @@ class ShopifyHandler {
         await this.shopify.graphql(
           addCustomItemToOrder(
             calculatedOrder.id,
-            `${persFeeItemTitle} - ${persLineItem.itemIdentifier}`,
+            `${PERS_FEE_ITEM_TITLE} - ${persLineItem.itemIdentifier}`,
             Number(persLineItem.price),
             persLineItem.quantity
           )
@@ -80,8 +80,8 @@ class ShopifyHandler {
 
   async registerWebhook(topic) {
     try {
-      const callbackUrl = host + '/webhook/order';
-      log.info(`Watching store: ${shopifyEnv.SHOP}`);
+      const callbackUrl = HOST + '/webhook/order';
+      log.info(`Watching store: ${SHOP}`);
 
       // Check if webhook already exists
       const webhooks = await this.shopify.webhook.list();
@@ -100,7 +100,7 @@ class ShopifyHandler {
 
   async deleteWebhook(topic) {
     try {
-      const callbackUrl = host + '/webhook/order';
+      const callbackUrl = HOST + '/webhook/order';
 
       // Check if webhook  exists
       const webhooks = await this.shopify.webhook.list();

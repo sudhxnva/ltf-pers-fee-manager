@@ -1,14 +1,14 @@
 const app = require('./app');
 const ShopifyHandler = require('./utils/Shopify');
-const { port } = require('./config/config');
+const { PORT } = require('./config');
 const log = require('./config/logger');
 const { Sentry } = require('./config/errorMonitoring');
 const shop = new ShopifyHandler();
 
-const server = app.listen(port, () => {
+const server = app.listen(PORT, () => {
   shop.registerWebhook('orders/create');
 
-  log.info(`Listening to port ${port}`);
+  log.info(`App listening on port: ${PORT}`);
 });
 
 const exitHandler = async () => {
