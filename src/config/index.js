@@ -17,7 +17,6 @@ const env = cleanEnv(process.env, {
   API_PASSWD: str({ desc: 'Shopify API Secret' }),
   FC_ORDER_INPUT_KEY: str({ desc: 'FashionCraft Order Input Key' }),
   FC_CUST_NUM: num({ desc: 'Fashioncraft customer number' }),
-  FC_GET_ORDER_URL: url({ desc: 'URL to get personalization details of FC order' }),
   FC_SEND_ORDER_URL: url({ desc: 'POST endpoint to send an FC order to' }),
 });
 
