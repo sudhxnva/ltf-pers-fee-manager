@@ -20,7 +20,7 @@ const exitHandler = async () => {
 };
 
 const unexpectedErrorHandler = (error) => {
-  Sentry.captureException(err);
+  Sentry.captureException(error);
   log.error(error);
   exitHandler();
 };

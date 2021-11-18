@@ -1,7 +1,11 @@
-const { PERS_FEE_ID, FC_GET_ORDER_URL, FC_ORDER_INPUT_KEY, FC_SEND_ORDER_URL } = require('../config');
+const { PERS_FEE_ID, FC_SEND_ORDER_URL, FC_ORDER_INPUT_KEY, FC_CUST_NUM } = require('../config');
 const ShopifyHandler = require('../utils/Shopify');
+const { cleanObject } = require('../utils');
 const js2xmlparser = require('js2xmlparser');
 const axios = require('axios').default;
+const encodeUrl = require('encodeurl');
+const logger = require('../config/logger');
+const { Sentry } = require('../config/errorMonitoring');
 
 async function orderWebhookHandler(req, res) {
   // Send 200 OK response first and then process order asynchronously. (Webhooks have a timeout of 5s)
@@ -80,98 +84,58 @@ async function fashioncraftOrderHandler(order, lineItems) {
   }
   for (const lineItem of lineItems) {
     let { value: designID } = lineItem.properties.find((prop) => prop.name == '_FC Design ID');
-    let { value: productType } = lineItem.properties.find((prop) => (prop.name = '_FC_product_type'));
+    let { value: productType } = lineItem.properties.find((prop) => prop.name == '_FC_product_type');
     if (!designID) continue;
-    const { data } = axios.get(`${FC_GET_ORDER_URL}?DesignID=${designID}`);
     let obj = {
       number: lineItem.sku.split('FC-')[1],
       quantity: lineItem.quantity,
+      DesignIDNumber: designID,
     };
 
-    if (productType == 'personalizedItem') {
-      obj = {
-        ...obj,
-        layout: data.layout,
-        backgroundColor: data.backgroundColor,
-        graphic: data.graphicID,
-        border: data.border,
-        pattern: data.pattern,
-        font: data.font,
-        DesignText: data.designText,
-        textLine1: data.textLine1,
-        textLine2: data.textLine2,
-        textLine3: data.textLine3,
-        DesignIDNumber: data.siteID,
-        textType: data.textType,
-        textColor: data.textColor,
-        borderColor: data.borderBottomColor,
-        pattern: data.pattern,
-        patternColor: data.patternColor,
-        line1Color: data.textLine1Color,
-        line2Color: data.textLine2Color,
-        RushProduction: Number(data.RushProduction) != 0 ? 'yes' : undefined,
-        Assemble: Number(data.RushProduction) != 0 ? 'yes' : undefined,
-      };
-      personalizedItem.push(obj);
-      continue;
+    switch (productType) {
+      case 'personalizedItem':
+        personalizedItem.push(obj);
+        break;
+      case 'glassItem':
+        glassItem.push(obj);
+      case 'tag':
+        tag.push(obj);
+      default:
+        item.push(obj);
+        break;
     }
-
-    if (productType == 'glassItem') {
-      obj = {
-        ...obj,
-        name1: data.textLine1,
-        name2: data.textLine2,
-        font: data.font,
-        MonogramText: data.monogramLetters,
-        DesignText: data.designText,
-        DesignIDNumber: siteID,
-        RushProduction: Number(data.RushProduction) != 0 ? 'yes' : undefined,
-      };
-      glassItem.push(obj);
-      continue;
-    }
-
-    if (productType == 'tag') {
-      obj = {
-        ...obj,
-        backgroundColor: data.backgroundColor,
-        borderColor: data.borderBottomColor,
-        pattern: data.pattern,
-        patternColor: data.patternColor,
-        graphic: data.graphicID,
-        font: data.font,
-        line1Color: data.textLine1Color,
-        DesignText: data.designText,
-        textLine1: data.textLine1,
-        textLine2: data.textLine2,
-        type: tagsOrStickers,
-        DesignIDNumber: data.siteID,
-      };
-      tag.push(obj);
-      continue;
-    }
-
-    item.push(obj);
   }
 
   const orderObj = {
-    custNum: 1234, // TODO: Get FC customer number
+    custNum: FC_CUST_NUM,
     orderInputKey: FC_ORDER_INPUT_KEY,
-    poNum: order.id,
-    shippingService: 'UPS', // TODO: Check with Mike about this
+    poNum: 'TEST', //order.id,
+    shippingService: 'UPS',
     shippingMethod,
     dropShipInfo,
-    item: item.length > 0 ? item : undefined,
-    personalizedItem: personalizedItem.length > 0 ? personalizedItem : undefined,
-    glassItem: glassItem.length > 0 ? glassItem : undefined,
-    tag: tag.length > 0 ? tag : undefined,
+    ...(item.length > 0 && { item }),
+    ...(personalizedItem.length > 0 && { personalizedItem }),
+    ...(glassItem.length > 0 && { glassItem }),
+    ...(tag.length > 0 && { tag }),
   };
-  xmlOrderPayload = js2xmlparser.parse('order', orderObj, { declaration: { encoding: 'UTF-8', version: '1.0' } });
-
-  const res = await axios.post(`${FC_ORDER_INPUT_KEY}/?beta=1`, xmlOrderPayload, {
-    headers: { 'Content-Type': 'text/xml' },
+  const xmlOrderPayload = js2xmlparser.parse('order', cleanObject(orderObj), {
+    declaration: { encoding: 'utf-8', version: '1.0' },
   });
-  console.log(res.data);
+
+  const res = await axios.post(`${FC_SEND_ORDER_URL}/?order=${encodeUrl(xmlOrderPayload)}`, null);
+
+  if (res.data === 1) return logger.info(`LTF Order ${order.name} accepted by FC`);
+
+  const [statusCode, message] = res.data.split(',');
+  switch (statusCode) {
+    case '0':
+      const errorMessage = `LTF Order ${order.name} rejected by FC with the message: ${message}`;
+      logger.error(errorMessage);
+      Sentry.captureMessage(errorMessage);
+      break;
+    case '1':
+      logger.info(`LTF Order ${order.name} accepted by FC with message: ${message}`);
+  }
 }
 
 module.exports = {
