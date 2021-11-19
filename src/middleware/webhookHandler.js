@@ -98,8 +98,10 @@ async function fashioncraftOrderHandler(order, lineItems) {
         break;
       case 'glassItem':
         glassItem.push(obj);
+        break;
       case 'tag':
         tag.push(obj);
+        break;
       default:
         item.push(obj);
         break;
@@ -109,7 +111,7 @@ async function fashioncraftOrderHandler(order, lineItems) {
   const orderObj = {
     custNum: FC_CUST_NUM,
     orderInputKey: FC_ORDER_INPUT_KEY,
-    poNum: 'TEST', //order.id,
+    poNum: 'TEST', // TODO: Switch to real order name when FC approves
     shippingService: 'UPS',
     shippingMethod,
     dropShipInfo,
@@ -122,7 +124,7 @@ async function fashioncraftOrderHandler(order, lineItems) {
     declaration: { encoding: 'utf-8', version: '1.0' },
   });
 
-  const res = await axios.post(`${FC_SEND_ORDER_URL}/?order=${encodeUrl(xmlOrderPayload)}`, null);
+  const res = await axios.post(`${FC_SEND_ORDER_URL}/?beta=1&order=${encodeUrl(xmlOrderPayload)}`, null); // TODO: Remove beta flag when FC approves
 
   if (res.data === 1) return logger.info(`LTF Order ${order.name} accepted by FC`);
 
