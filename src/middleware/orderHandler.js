@@ -112,7 +112,7 @@ async function fashioncraftOrderHandler(order, lineItems) {
     const orderObj = {
       custNum: FC_CUST_NUM,
       orderInputKey: FC_ORDER_INPUT_KEY,
-      poNum: 'TEST', // TODO: Switch to real order name when FC approves
+      poNum: order.name,
       shippingService: 'UPS',
       shippingMethod,
       dropShipInfo,
@@ -125,7 +125,7 @@ async function fashioncraftOrderHandler(order, lineItems) {
       declaration: { encoding: 'utf-8', version: '1.0' },
     });
 
-    const res = await axios.post(`${FC_SEND_ORDER_URL}/?beta=1&order=${encodeUrl(xmlOrderPayload)}`, null); // TODO: Remove beta flag when FC approves
+    const res = await axios.post(`${FC_SEND_ORDER_URL}/?order=${encodeUrl(xmlOrderPayload)}`, null);
 
     if (res.data === 1) return log.info(`LTF Order ${order.name} accepted by FC`);
 
