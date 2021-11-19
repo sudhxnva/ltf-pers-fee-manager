@@ -25,17 +25,18 @@ const unexpectedErrorHandler = (error) => {
   exitHandler();
 };
 
+const termHandler = (signal) => {
+  return async () => {
+    log.info(`${signal} received`);
+    await shop.deleteWebhook('orders/create');
+    server.close();
+    process.exit(0);
+  };
+};
+
 process.on('uncaughtException', unexpectedErrorHandler);
 process.on('unhandledRejection', unexpectedErrorHandler);
 
-process.on('SIGTERM', async () => {
-  log.info('SIGTERM received');
-  await shop.deleteWebhook('orders/create');
-  server.close();
-});
+process.on('SIGTERM', termHandler('SIGTERM'));
 
-process.on('SIGINT', async () => {
-  log.info('SIGINT received');
-  await shop.deleteWebhook('orders/create');
-  server.close();
-});
+process.on('SIGINT', termHandler('SIGINT'));
