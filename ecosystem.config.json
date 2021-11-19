@@ -7,8 +7,12 @@
       "autorestart": true,
       "watch": false,
       "time": true,
-      "log_file": "logs/combined.log",
+      "out_file": "logs/logs.log",
+      "error_file": "logs/errors.log",
       "env": {
+        "NODE_ENV": "development"
+      },
+      "env_production": {
         "NODE_ENV": "production"
       }
     }
