@@ -4,7 +4,7 @@ const { cleanObject } = require('../utils');
 const js2xmlparser = require('js2xmlparser');
 const axios = require('axios').default;
 const encodeUrl = require('encodeurl');
-const logger = require('../config/logger');
+const log = require('../config/logger');
 const { Sentry } = require('../config/errorMonitoring');
 
 async function orderHandler(req, res) {
@@ -54,89 +54,95 @@ async function orderHandler(req, res) {
 }
 
 async function fashioncraftOrderHandler(order, lineItems) {
-  const shipping = order.shipping_address;
-  const dropShipInfo = {
-    name: shipping.first_name + ' ' + shipping.last_name,
-    country: 'US',
-    address1: shipping.address1,
-    address2: shipping.address2,
-    city: shipping.city,
-    stateProvince: shipping.province,
-    zip: shipping.zip,
-    phone: shipping.phone,
-  };
-
-  let shippingMethod;
-  let [item, glassItem, personalizedItem, tag] = [[], [], [], []];
-  switch (order.shipping_lines.code) {
-    case 'FEDEX_2_DAY':
-    case 'TWO_DAY_AIR':
-    case 'BY_PRICE_2_DAY':
-      shippingMethod = '2ND DAY AIR';
-      break;
-    case 'FEDEX_STD_OVERNIGHT':
-    case 'NEXT_DAY_AIR':
-    case 'BY_PRICE_EXPEDITED':
-      shippingMethod = 'NEXT DAY AIR';
-      break;
-    default:
-      shippingMethod = 'GROUND';
-  }
-  for (const lineItem of lineItems) {
-    let { value: designID } = lineItem.properties.find((prop) => prop.name == '_FC Design ID');
-    let { value: productType } = lineItem.properties.find((prop) => prop.name == '_FC_product_type');
-    if (!designID) continue;
-    let obj = {
-      number: lineItem.sku.split('FC-')[1],
-      quantity: lineItem.quantity,
-      DesignIDNumber: designID,
+  try {
+    const shipping = order.shipping_address;
+    const dropShipInfo = {
+      name: shipping.first_name + ' ' + shipping.last_name,
+      country: 'US',
+      address1: shipping.address1,
+      address2: shipping.address2,
+      city: shipping.city,
+      stateProvince: shipping.province,
+      zip: shipping.zip,
+      phone: shipping.phone,
     };
 
-    switch (productType) {
-      case 'personalizedItem':
-        personalizedItem.push(obj);
+    let shippingMethod;
+    let [item, glassItem, personalizedItem, tag] = [[], [], [], []];
+    switch (order.shipping_lines.code) {
+      case 'FEDEX_2_DAY':
+      case 'TWO_DAY_AIR':
+      case 'BY_PRICE_2_DAY':
+        shippingMethod = '2ND DAY AIR';
         break;
-      case 'glassItem':
-        glassItem.push(obj);
-        break;
-      case 'tag':
-        tag.push(obj);
+      case 'FEDEX_STD_OVERNIGHT':
+      case 'NEXT_DAY_AIR':
+      case 'BY_PRICE_EXPEDITED':
+        shippingMethod = 'NEXT DAY AIR';
         break;
       default:
-        item.push(obj);
-        break;
+        shippingMethod = 'GROUND';
     }
-  }
+    for (const lineItem of lineItems) {
+      let { value: designID } = lineItem.properties.find((prop) => prop.name == '_FC Design ID');
+      let { value: productType } = lineItem.properties.find((prop) => prop.name == '_FC_product_type');
+      if (!designID) continue;
+      let obj = {
+        number: lineItem.sku.split('FC-')[1],
+        quantity: lineItem.quantity,
+        DesignIDNumber: designID,
+      };
 
-  const orderObj = {
-    custNum: FC_CUST_NUM,
-    orderInputKey: FC_ORDER_INPUT_KEY,
-    poNum: 'TEST', // TODO: Switch to real order name when FC approves
-    shippingService: 'UPS',
-    shippingMethod,
-    dropShipInfo,
-    ...(item.length > 0 && { item }),
-    ...(personalizedItem.length > 0 && { personalizedItem }),
-    ...(glassItem.length > 0 && { glassItem }),
-    ...(tag.length > 0 && { tag }),
-  };
-  const xmlOrderPayload = js2xmlparser.parse('order', cleanObject(orderObj), {
-    declaration: { encoding: 'utf-8', version: '1.0' },
-  });
+      switch (productType) {
+        case 'personalizedItem':
+          personalizedItem.push(obj);
+          break;
+        case 'glassItem':
+          glassItem.push(obj);
+          break;
+        case 'tag':
+          tag.push(obj);
+          break;
+        default:
+          item.push(obj);
+          break;
+      }
+    }
 
-  const res = await axios.post(`${FC_SEND_ORDER_URL}/?beta=1&order=${encodeUrl(xmlOrderPayload)}`, null); // TODO: Remove beta flag when FC approves
+    const orderObj = {
+      custNum: FC_CUST_NUM,
+      orderInputKey: FC_ORDER_INPUT_KEY,
+      poNum: 'TEST', // TODO: Switch to real order name when FC approves
+      shippingService: 'UPS',
+      shippingMethod,
+      dropShipInfo,
+      ...(item.length > 0 && { item }),
+      ...(personalizedItem.length > 0 && { personalizedItem }),
+      ...(glassItem.length > 0 && { glassItem }),
+      ...(tag.length > 0 && { tag }),
+    };
+    const xmlOrderPayload = js2xmlparser.parse('order', cleanObject(orderObj), {
+      declaration: { encoding: 'utf-8', version: '1.0' },
+    });
 
-  if (res.data === 1) return logger.info(`LTF Order ${order.name} accepted by FC`);
+    const res = await axios.post(`${FC_SEND_ORDER_URL}/?beta=1&order=${encodeUrl(xmlOrderPayload)}`, null); // TODO: Remove beta flag when FC approves
 
-  const [statusCode, message] = res.data.split(',');
-  switch (statusCode) {
-    case '0':
-      const errorMessage = `LTF Order ${order.name} rejected by FC with the message: ${message}`;
-      logger.error(errorMessage);
-      Sentry.captureMessage(errorMessage);
-      break;
-    case '1':
-      logger.info(`LTF Order ${order.name} accepted by FC with message: ${message}`);
+    if (res.data === 1) return log.info(`LTF Order ${order.name} accepted by FC`);
+
+    const [statusCode, message] = res.data.split(',');
+    switch (statusCode) {
+      case '0':
+        const errorMessage = `LTF Order ${order.name} rejected by FC with the message: ${message}`;
+        log.error(errorMessage);
+        Sentry.captureMessage(errorMessage);
+        break;
+      case '1':
+        const warnMessage = `LTF Order ${order.name} accepted by FC with message: ${message}`;
+        log.warn(warnMessage);
+        Sentry.captureMessage(warnMessage);
+    }
+  } catch (error) {
+    Sentry.captureException(error);
   }
 }
 
