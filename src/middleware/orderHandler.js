@@ -7,7 +7,7 @@ const encodeUrl = require('encodeurl');
 const logger = require('../config/logger');
 const { Sentry } = require('../config/errorMonitoring');
 
-async function orderWebhookHandler(req, res) {
+async function orderHandler(req, res) {
   // Send 200 OK response first and then process order asynchronously. (Webhooks have a timeout of 5s)
   res.sendStatus(200);
 
@@ -141,5 +141,5 @@ async function fashioncraftOrderHandler(order, lineItems) {
 }
 
 module.exports = {
-  orderWebhookHandler,
+  orderHandler,
 };

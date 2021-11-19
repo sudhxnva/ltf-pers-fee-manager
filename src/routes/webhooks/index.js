@@ -1,6 +1,6 @@
 const express = require('express');
-const { orderWebhookHandler } = require('../middleware/webhookHandler');
-const { verifyWebhook } = require('../middleware/verifyWebhook');
+const { orderHandler } = require('../../middleware/orderHandler');
+const { verifyWebhook } = require('../../middleware/verifyWebhook');
 const router = express.Router();
 
 // Base endpoint (for uptime checking)
@@ -11,6 +11,6 @@ router.get('/', (req, res) => {
 // Verify that request came from Shopify
 router.use(verifyWebhook);
 
-router.post('/order', orderWebhookHandler);
+router.post('/order', orderHandler);
 
 module.exports = router;

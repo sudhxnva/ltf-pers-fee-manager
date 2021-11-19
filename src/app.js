@@ -4,7 +4,8 @@ const cors = require('cors');
 const { Sentry } = require('./config/errorMonitoring');
 const morgan = require('./config/morgan');
 const httpStatus = require('http-status');
-const routes = require('./routes');
+const webhookHandler = require('./routes/webhooks');
+const apiHandler = require('./routes/api');
 const ApiError = require('./utils/ApiError');
 
 const app = express();
@@ -37,7 +38,8 @@ app.options('*', cors());
 app.get('/favicon.ico', (req, res) => res.sendStatus(204));
 
 // Main routes
-app.use('/webhook', routes);
+app.use('/webhook', webhookHandler);
+app.use('/api', apiHandler);
 
 app.use(
   Sentry.Handlers.errorHandler({
