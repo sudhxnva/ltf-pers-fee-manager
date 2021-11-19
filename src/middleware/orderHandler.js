@@ -17,7 +17,10 @@ async function orderHandler(req, res) {
   let addPersLineItems = [];
 
   for (const lineItem of order.line_items) {
-    if (lineItem.vendor === 'Fashioncraft') fashioncraftLineItems.push(lineItem);
+    if (lineItem.vendor === 'Fashioncraft') {
+      fashioncraftLineItems.push(lineItem);
+      continue;
+    }
     if (lineItem.product_id !== PERS_FEE_ID) continue;
     if (lineItem.quantity === 1) continue; // Replacing line item not necessary since quantity is only 1
     originalPersLineItems.push(lineItem);
