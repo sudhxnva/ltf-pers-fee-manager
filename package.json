@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "env-cmd -f ./.env.dev nodemon src/index.js",
-    "start": "pm2-runtime start ecosystem.config.json --env production"
+    "start": "node src/index.js"
   },
   "keywords": [],
   "author": "",
